@@ -3,13 +3,14 @@
 #load in mRNA transport excel doc.
 library(readxl)
 morph <- read_xlsx(path = "NMorph_R.xlsx", 
-                   sheet = 1, col_names = T,skip = 1) #satisfies number 3
+                   sheet = 1, col_names = T,skip = 1) 
 head(morph)
 
 #subset the nuclear and cytoplasmic signals as well as the ratio columns
 morph.sub<-morph[,c('Percent Abnormal Y',
-                    'Percent Abnormal O')] #satisfies numbers 5 and 6
+                    'Percent Abnormal O')] 
 head(morph.sub)
+
 
 co.names <- c('perc.ab.y',
               'perc.ab.o')
@@ -25,10 +26,8 @@ summarize(.data=morph.sub,mean.ab.young=mean(perc.ab.y), sd.per.ab.y=sd(perc.ab.
 summarize(.data=morph.sub,mean.ab.young=mean(perc.ab.o), sd.per.ab.y=sd(perc.ab.o)) #satisfies number 8
 
 
-morph.sub.desc<-arrange(df = morph.sub,desc(perc.ab.o)) #satisfies numbers 7
+morph.sub.desc<-arrange(df = morph.sub,desc(perc.ab.o))
 head(morph.sub.desc)
-
-summary(morph.sub.desc)
 
 library(tidyverse)
 
@@ -37,33 +36,33 @@ p <- morph.sub.desc
 
 outlier.perc <- if_else(condition = p > 70, true = "outlier", 
                         false = "normal")
-#checks to see if any outliers are present in the data set
-
 outlier.perc
+
+
 
 no.outliers <- subset(x = morph.sub.desc, 
                       perc.ab.o < 70 & perc.ab.y < 70) 
+
+no.outliers
 #removes the previously identified outliers
 
+library(wesanderson)
 
-ggplot(data = no.outliers, aes(x = perc.ab.y,y= num)) +
-  geom_col()+ geom_point(color='blue',size=2)+
-  scale_fill_manual(values=wes_palette("GrandBudapest1",n=2)+
-                      stat_smooth(method = 'loess'))
+str(no.outliers)
+hist1<-hist(no.outliers$perc.ab.o)
+hist2<-hist(no.outliers$perc.ab.y)
 
+t.test(x=no.outliers$perc.ab.o,y=no.outliers$perc.ab.y)
 
-
-
-
-
+#slight evidence of a significant difference.  
 
 
 ####################################################################
 
-#load in mRNA transport excel doc.
+#load in mRNA transport excel doc. --> checking cellprofiler pipeline
 library(readxl)
 mrna <- read_xlsx(path = "cell.prof.fish.xlsx", 
-                  sheet = 1, col_names = T,skip = 2) #satisfies number 3
+                  sheet = 1, col_names = T,skip = 2) 
 head(mrna)
 
 
@@ -83,11 +82,12 @@ nuc2cyt.3 <- function(a){
   return(b) 
 }
 
+
 mrna$r.ratio.3<-nuc2cyt.3(mrna$nuc.3)
 head(mrna)
-#calculating ratios using R instead of using pre-existing ratios
+#calculating ratios using R to check against other calculations
 
-#######################################################################
+
 
 #making histogram or density plot
 
@@ -103,7 +103,7 @@ hist.2<-hist(mrna$r.ratio.3)
 mrna.sub<-mrna[c('r.ratio.1', 'r.ratio.3')]
 
 head(mrna.sub)
-old
+
 library(ggplot2)
 
 #making box-whicker plots
@@ -114,6 +114,7 @@ ratio.1<-ggplot(data = mrna.sub, aes(x = , y=r.ratio.1, fill=r.ratio.1)) +
         axis.title.y = element_text(face="bold",size=12),
         panel.background = element_rect(fill="pink",colour="black"))
 
+ratio.1
 
 ratio.3<-ggplot(data = mrna.sub, aes(x = , y=r.ratio.3, fill=r.ratio.3)) +
   geom_boxplot() +
@@ -121,20 +122,20 @@ ratio.3<-ggplot(data = mrna.sub, aes(x = , y=r.ratio.3, fill=r.ratio.3)) +
         axis.title.y = element_text(face="bold",size=12),
         panel.background = element_rect(fill="tan",colour="black"))
 
-boxplot(mrna.sub)
+ratio.3
 
-#############################################################################
+bpmrna<-boxplot(mrna.sub) #additional whisker boxplot with both
 
-#t-test - old v young
 summary(mrna.sub)
 
-library(stats)
-#onesided
-t.test(x = mrna.sub,conf.level = 0.95)
-#suggests that r.ratio.1 is larger than r.ratio.3 --> pipline isn't functioning
-##properly
+#t-test - slide 1 v slide 3
+t.test(x=mrna.sub$r.ratio.1,y=mrna.sub$r.ratio.3)
 
 
+#p value <<<0.05 --> suggests values significantly differ-->pipline isn't 
+#functioning properly
+
+boxplot(mrna.sub)
 
 w.1a<-ggplot(data = mrna.sub, aes(x = r.ratio.1, y = 'y')) +
   geom_boxplot()
@@ -150,54 +151,6 @@ z
 png('z.png')
 
 dev.off()
-
-
-
-
-
-################################################
-
-
-
-
-
-
-
-
-
-
-
-
-ggplot(data = mrna, aes(x = r.ratio.1, y = )) +
-  geom_histogram(bins = 50)
-
-ggplot(data = mrna, aes(x = r.ratio.3, y = )) +
-  geom_histogram()
-
-
-
-
-
-
-
-
-
-
-
-
-#subset the nuclear and cytoplasmic signals as well as the ratio columns
-mrna.sub<-mrna[,c('ONUC:CYT','YNUC:CYT')] #satisfies numbers 5 and 6
-head(mrna.sub)
-
-
-library(plyr)
-
-mrna.desc<-arrange(.data = mrna.sub,desc(mrna.sub,c(YNUC:CYT))) #satisfies numbers 7
-head(mrna.desc)
-
-rm.na<-rm(mrna.asc)
-
-summarize(mrna.desc$c(1:2))
 
 ################################################
 
@@ -216,8 +169,12 @@ sub.qpcr<-qpcr[,c('num','protein',
                   'old','young')] 
 head(sub.qpcr)
 
+pd<-arrange(.data = sub.qpcr,desc(sub.qpcr,c(num)))
+head(pd)
 
-p <- sub.qpcr
+
+
+p <- pd
 outlier.gene <- if_else(condition = p > 5, true = "outlier", 
                         false = "normal")
 
@@ -228,22 +185,25 @@ library(ggplot2)
 p<-ggplot(data = no.out.qpcr, aes(x = young, y = num)) +
   geom_point()
 
+p
+
 png('p.png')
 dev.off()
 
 plot.1<-ggplot(data = no.out.qpcr, aes(x = young,y=num)) +
-  geom_col()+ geom_point(color='blue',size=2)+
+  geom_line()+ geom_point(color='blue',size=2)+
   scale_fill_manual(values=wes_palette("GrandBudapest1",n=2)+
-                      stat_smooth(method = 'loess'))
+                      stat_smooth(method = 'lm'))
+
+plot.1
 
 ##########################################################
 #ddply to execute function over df
+no.out.qpcr
 
 old.10 <- ddply(.data = no.out.qpcr, .variables = c("old","young"), function(r){
   
-  no.out.qpcr$old.10x <- no.out.qpcr$old*10 #says to add parcel.length.km and 
-  #fill it with values of the parcel.length.m divided by 1000
-  return(r) #return the new field, 'x'
+  no.out.qpcr$old.10 <- no.out.qpcr$old*10
   
 }, .progress = "text", .inform = T)
 
@@ -262,19 +222,7 @@ write.table(no.out.qpcr, file = "export.one.txt", sep = "\t",
 
 ggsave('plot.1.png')
 dev.off()
-
-
-# Write data to csv files:  
-# decimal point = "." and value separators = comma (",")
-write.csv(mtcars, file = "mtcars.csv")
-# Write data to csv files: 
-# decimal point = comma (",") and value separators = semicolon (";")
-write.csv2(mtcars, file = "mtcars.csv")
-
-
-
-
-
+##############################################################################
 #Making line plot
 
 library(readxl)
@@ -299,5 +247,40 @@ p
 png("p.png")
 dev.off()
 
-
 #Testing linear model
+
+#test the signficance of the relationship & fit a model to two quantitative 
+#fields: patch.density.m3 and parcel.length.m
+y <- qpcr.bsub$age
+x <- qpcr.bsub$avg
+
+
+#linear model
+fit <- lm(formula = y~x)
+plot(fit)
+summary(fit)
+
+#linear model is not likely a good fit for the data
+
+
+#Check polynomial model
+fit2 <- lm(formula = age ~ poly(x = avg, degree = 2), data = qpcr.bsub)
+plot(fit2)
+summary(fit2)
+#not a good model but some indcation of outliers skewing results; R squared=.4%
+
+fit3 <- lm(formula =  age~ poly(x = avg, degree = 3), data = qpcr.bsub)
+summary(fit3)
+
+
+
+#not a good model but some indication of outliers skewing results; R squared=.34%
+
+plot(x = age, y = avg, pch=19)
+lines(0:100, predict(fit, data.frame(x=0:100)),col="red") #1:100 --> 
+#x graph values
+lines(0:100, predict(fit2, data.frame(x=0:100)),col="blue")
+lines(0:100, predict(fit3, data.frame(x=0:100)),col="green")
+
+
+
