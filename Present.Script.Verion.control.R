@@ -21,9 +21,9 @@ head(morph.sub)
 ##################################################################
 library(plyr)
 
-summarize(.data=morph.sub,mean.ab.young=mean(perc.ab.y), sd.per.ab.y=sd(perc.ab.y)) #satisfies number 8
+summarize(.data=morph.sub,mean.ab.young=mean(perc.ab.y), sd.per.ab.y=sd(perc.ab.y)) 
 
-summarize(.data=morph.sub,mean.ab.young=mean(perc.ab.o), sd.per.ab.y=sd(perc.ab.o)) #satisfies number 8
+summarize(.data=morph.sub,mean.ab.young=mean(perc.ab.o), sd.per.ab.y=sd(perc.ab.o)) 
 
 
 morph.sub.desc<-arrange(df = morph.sub,desc(perc.ab.o))
@@ -51,6 +51,7 @@ library(wesanderson)
 str(no.outliers)
 hist1<-hist(no.outliers$perc.ab.o)
 hist2<-hist(no.outliers$perc.ab.y)
+lines(density(no.outliers$perc.ab.y,adjust = .1))
 
 t.test(x=no.outliers$perc.ab.o,y=no.outliers$perc.ab.y)
 
@@ -91,9 +92,14 @@ head(mrna)
 
 #making histogram or density plot
 
-hist.1<-hist(mrna$r.ratio.1) 
+hist.1<-hist(mrna$r.ratio.1)
+lines(density(mrna$r.ratio.1))
 
-hist.2<-hist(mrna$r.ratio.3)
+hist.2<-hist(x=mrna$r.ratio.1)
+lines(density(mrna$r.ratio.3))
+
+
+
 #visually comparring data to see if any prominent features occur.
 ##Image 3 appears to shifted to the right, indicating inconsistency 
 ##in the Cell Profiler pipeline made.  
@@ -158,7 +164,7 @@ dev.off()
 
 library(readxl)
 qpcr <- read_xlsx(path = "qpcr.r.copy.xlsx", 
-                  sheet = 1, col_names = T,skip = 0,na = "0") #satisfies number 3
+                  sheet = 1, col_names = T,skip = 0,na = "0") 
 head(qpcr)
 
 
@@ -227,7 +233,7 @@ dev.off()
 
 library(readxl)
 qpcr.b <- read_xlsx(path = "qpcr.r.copyb.xlsx", 
-                    sheet = 1, col_names = T,skip = 0,na = "0") #satisfies number 3
+                    sheet = 1, col_names = T,skip = 0,na = "0") 
 head(qpcr.b)
 
 qpcr.bsub<-qpcr.b[,c("age","avg")]
@@ -237,8 +243,6 @@ head(qpcr.bsub)
 library("RColorBrewer")
 
 p <- ggplot(data = qpcr.bsub, aes(x = age, y = avg, color='red')) +
-  #use the 'color=" argument for elements like points and lines
-  #use the 'fill =" argument for elements like bars or box-whiskers or areas
   geom_point() +
   geom_smooth(method = "lm")+
   scale_color_brewer(palette = "Set2")
@@ -249,8 +253,6 @@ dev.off()
 
 #Testing linear model
 
-#test the signficance of the relationship & fit a model to two quantitative 
-#fields: patch.density.m3 and parcel.length.m
 y <- qpcr.bsub$age
 x <- qpcr.bsub$avg
 
@@ -275,12 +277,5 @@ summary(fit3)
 
 
 #not a good model but some indication of outliers skewing results; R squared=.34%
-
-plot(x = age, y = avg, pch=19)
-lines(0:100, predict(fit, data.frame(x=0:100)),col="red") #1:100 --> 
-#x graph values
-lines(0:100, predict(fit2, data.frame(x=0:100)),col="blue")
-lines(0:100, predict(fit3, data.frame(x=0:100)),col="green")
-
 
 
